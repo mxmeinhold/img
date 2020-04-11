@@ -1,0 +1,6 @@
+# Build directory
+target/*
+
+# Test files
+print_colors
+*.png
