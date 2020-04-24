@@ -34,6 +34,8 @@ lib: $(LIB_O_FILES)
 	@mkdir -p $(LIB_DIR)
 	ar rcs $(LIB_DIR)/$(LIB_NAME).a $(LIB_O_FILES)
 	gcc -shared -o $(LIB_DIR)/$(LIB_NAME).so $(LIB_O_FILES)
+
+install: lib
 	@echo "Using sudo to install library files to /usr/lib/ and call ldconfig"
 	sudo cp $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so /usr/lib/
 	sudo cp $(H_FILES) /usr/include/
