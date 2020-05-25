@@ -3,7 +3,7 @@
 
 #include "img.h"
 
-int writepng(char* file_name, struct img* img_ptr) {
+int writepng(const char* file_name, struct img* img_ptr) {
     FILE *fp = fopen(file_name, "wb");
     if (!fp) return ERROR_FILE_OPEN_ERR;
 

@@ -28,6 +28,6 @@ enum status {
 
 // Writes the image defined in img_ptr to the file referred to by file_name.
 // Returns an integer representing the result status of the writing.
-int writepng(char* file_name, struct img* img_ptr);
+int writepng(const char* file_name, struct img* img_ptr);
 
 #endif

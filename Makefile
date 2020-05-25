@@ -1,5 +1,16 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic -std=c99
+CFLAGS = -std=c99
+
+# Warnings
+CFLAGS += -Wall -Wextra -Wpedantic \
+          -Wformat=2 -Wno-unused-parameter -Wshadow \
+          -Wwrite-strings -Wstrict-prototypes -Wold-style-definition \
+          -Wredundant-decls -Wnested-externs -Wmissing-include-dirs
+
+# GCC warnings that Clang doesn't provide:
+ifeq ($(CC),gcc)
+		CFLAGS += -Wjump-misses-init -Wlogical-op
+endif
 
 H_FILES = img.h
 _O_FILES = img.o test.o
