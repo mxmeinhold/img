@@ -5,9 +5,9 @@
 
 // 8 bits per color, no transparancy
 struct pixel {
-    png_byte red;
-    png_byte green;
-    png_byte blue;
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
 };
 
 // pixels are stored in an array of rows
