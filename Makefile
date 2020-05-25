@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -std=c99
 
 H_FILES = img.h
-_O_FILES = img.o main.o
+_O_FILES = img.o test.o
 _LIB_O_FILES = img.o
 
 BUILD_DIR = target

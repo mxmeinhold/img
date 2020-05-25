@@ -1,9 +1,9 @@
-#include "img.h"
 #include <stdlib.h>
 
-// Small test writing program
-// Generates a nice little color test
-int main() {
+#include "img.h"
+
+// Test writing by generating a color gradient.
+void print_colors(void) {
     struct img out_img;
     out_img.width = 255;
     out_img.height = 255;
@@ -26,4 +26,9 @@ int main() {
         free(out_img.rows[row]);
     }
     free(out_img.rows);
+}
+
+int main(void) {
+    print_colors();
+    return 0;
 }
