@@ -1,6 +1,6 @@
-#include <time.h>
+#include <time.h> // time(), localtime()
 #include <png.h>
-#include <stdlib.h>
+#include <stdlib.h> // calloc()
 
 #include "img.h"
 
@@ -9,10 +9,10 @@ int readpng(const char* file_name, struct img* img_ptr) {
     if (!fp) return ERROR_FILE_OPEN_ERR;
 
     // Read 8 bytes of header and check if this is _probably_ a png
-    int number = 8;
-    void* header = malloc(number);
-    fread(header, 1, number, fp);
-    int is_png = !png_sig_cmp(header, 0, number);
+    int header_bytes = 8;
+    void* header = malloc(header_bytes);
+    fread(header, 1, header_bytes, fp);
+    int is_png = !png_sig_cmp(header, 0, header_bytes);
     if (!is_png) return ERROR_NOT_PNG;
 
     // Setup and handle errors for the read pointer
@@ -47,9 +47,8 @@ int readpng(const char* file_name, struct img* img_ptr) {
     }
 
     png_init_io(png_ptr, fp);
-
-    png_set_sig_bytes(png_ptr, number);
-
+    // Tell libpng how much header we read
+    png_set_sig_bytes(png_ptr, header_bytes);
     png_read_info(png_ptr, info_ptr);
 
     // Allocate pixel array
@@ -60,9 +59,10 @@ int readpng(const char* file_name, struct img* img_ptr) {
         img_ptr->rows[row] = calloc(sizeof(struct pixel), img_ptr->width);
     }
 
+    // Convert to 8 bit rbg from various other situations
+
     int bit_depth = png_get_bit_depth(png_ptr, info_ptr);
     int color_type = png_get_color_type(png_ptr, info_ptr);
-    // int channels = png_get_channels(png_ptr, info_ptr);
 
     if (color_type == PNG_COLOR_TYPE_PALETTE) {
         png_set_palette_to_rgb(png_ptr);
@@ -81,18 +81,18 @@ int readpng(const char* file_name, struct img* img_ptr) {
 
     png_set_interlace_handling(png_ptr);
 
+    // Set the updated transforms
     png_read_update_info(png_ptr, info_ptr);
-
     png_read_image(png_ptr,(png_bytepp) img_ptr->rows);
-
     png_read_end(png_ptr, end_info);
 
+    // Cleanup
     png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-
     fclose(fp);
 
     return SUCCESS;
 }
+
 
 int writepng(const char* file_name, struct img* img_ptr) {
     FILE *fp = fopen(file_name, "wb");

@@ -10,7 +10,7 @@ struct pixel {
     unsigned char blue;
 };
 
-// pixels are stored in an array of rows
+// pixels are stored in an array of row arrays
 struct img {
     int width;
     int height;
