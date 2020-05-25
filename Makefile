@@ -27,7 +27,7 @@ O_DIR = $(BUILD_DIR)/obj
 O_FILES = $(patsubst %,$(O_DIR)/%,$(_O_FILES))
 LIB_O_FILES = $(patsubst %,$(O_DIR)/%,$(_O_FILES))
 
-EXEC = print_colors
+EXEC = run_tests
 
 LIBRARIES = -lpng
 
