@@ -61,8 +61,9 @@ analyze: main
 	gprof2dot -f callgrind $(ANALYSIS_DIR)/callgrind.out --root=main | dot -Tpng -o $(ANALYSIS_DIR)/callgrind.png
 
 
-watch:
+watch: run
 	@command -v inotifywait >/dev/null 2>&1 || { echo >&2 "inotifywait not found, aborting watch"; exit 1; }
+	feh test.png &
 	while true; do \
 		clear; \
 		make run; \
