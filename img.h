@@ -23,11 +23,17 @@ enum status {
     ERROR,
     ERROR_FILE_OPEN_ERR,
     ERROR_PNG_INIT_ERR,
+    ERROR_NOT_PNG
 };
 
 
 // Writes the image defined in img_ptr to the file referred to by file_name.
 // Returns an integer representing the result status of the writing.
 int writepng(const char* file_name, struct img* img_ptr);
+
+
+// Reads an image from the specified file
+// Returns an integer representing the result status of the read.
+int readpng(const char* file_name, struct img* img_ptr);
 
 #endif

@@ -20,7 +20,7 @@ void print_colors(void) {
         }
     }
 
-    writepng("test.png", &out_img);
+    writepng("colors.png", &out_img);
 
     for (int row = 0; row < out_img.height; row++) {
         free(out_img.rows[row]);
@@ -28,7 +28,17 @@ void print_colors(void) {
     free(out_img.rows);
 }
 
-int main(void) {
+// Test reading by reading the written image and writing it out again
+// TODO this isn't a real unit test
+void read_write(void) {
+    struct img read_img;
+
+    readpng("colors.png", &read_img);
+    writepng("read_write.png", &read_img);
+}
+
+int main(int argc, char** argv) {
     print_colors();
+    read_write();
     return 0;
 }
