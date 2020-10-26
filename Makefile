@@ -46,11 +46,13 @@ lib: $(LIB_O_FILES)
 	ar rcs $(LIB_DIR)/$(LIB_NAME).a $(LIB_O_FILES)
 	gcc -shared -o $(LIB_DIR)/$(LIB_NAME).so $(LIB_O_FILES)
 
+tar:
+	tar -czvf img-$(shell cat VERSION).tar.gz Makefile $(_O_FILES:%.o=%.c) $(H_FILES) LICENSE.txt
+	gpg --output img-$(shell cat VERSION).tar.gz.sig --detach-sig img-$(shell cat VERSION).tar.gz
+
 install: lib
-	@echo "Using sudo to install library files to /usr/lib/ and call ldconfig"
-	sudo cp $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so /usr/lib/
-	sudo cp $(H_FILES) /usr/include/
-	sudo ldconfig
+	install $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so $(DESTDIR)/usr/lib/
+	install $(H_FILES) $(DESTDIR)/usr/include/
 
 analyze: main
 	@command -v valgrind >/dev/null 2>&1 || { echo >&2 "valgrind not found, aborting analyze"; exit 1; }
