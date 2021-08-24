@@ -14,6 +14,7 @@ int readpng(const char* file_name, struct img* img_ptr) {
     fread(header, 1, header_bytes, fp);
     int is_png = !png_sig_cmp(header, 0, header_bytes);
     if (!is_png) return ERROR_NOT_PNG;
+    free(header);
 
     // Setup and handle errors for the read pointer
     png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,

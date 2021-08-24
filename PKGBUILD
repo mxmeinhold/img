@@ -10,7 +10,7 @@ depends=('glibc')
 makedepends=('git' 'make')
 source=("img-$pkgver.tar.gz" "img-$pkgver.tar.gz.sig")
 sha256sums=(
-    'b4432e29f5a821304ae296b834788be5c9ace454f9ca780e100a722bda51aae5'
+    '9f6201c6b27a40778339daa21fad12d37b14562e5921f9d1e735313276a51078'
     'SKIP'
 )
 validpgpkeys=('B77D730E8D444707FA93320D72E05836F8252405')

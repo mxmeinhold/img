@@ -35,6 +35,11 @@ void read_write(void) {
 
     readpng("colors.png", &read_img);
     writepng("read_write.png", &read_img);
+
+    for (int row = 0; row < read_img.height; row++) {
+        free(read_img.rows[row]);
+    }
+    free(read_img.rows);
 }
 
 int main(int argc, char** argv) {
