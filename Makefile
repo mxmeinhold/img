@@ -1,15 +1,31 @@
+SHELL := bash
+.ONESHELL:
+.SHELLFLAGS := -eu -o pipefail -c
+.DELETE_ON_ERROR:
+MAKEFLAGS += --warn-undefined-variables --no-builtin-rules
+
 CC = gcc
-CFLAGS = -std=c99
+CFLAGS += -std=c99
+LDFLAGS ?=
+
+# If DEBUG is set, compile with gdb flags
+ifdef DEBUG
+CFLAGS += -g -ggdb
+endif
+
+ifdef STATIC
+CFLAGS += -static
+endif
 
 # Warnings
-CFLAGS += -Wall -Wextra -Wpedantic \
-          -Wformat=2 -Wno-unused-parameter -Wshadow \
-          -Wwrite-strings -Wstrict-prototypes -Wold-style-definition \
-          -Wredundant-decls -Wnested-externs -Wmissing-include-dirs
+WARNINGS = -Wall -Wextra -Wpedantic -Wconversion -Wformat=2 \
+	-Wformat-nonliteral -Winit-self -Wmissing-include-dirs -Wnested-externs \
+	-Wno-unused-parameter -Wold-style-definition -Wredundant-decls -Wshadow \
+	-Wstrict-prototypes -Wwrite-strings
 
 # GCC warnings that Clang doesn't provide:
 ifeq ($(CC),gcc)
-		CFLAGS += -Wjump-misses-init -Wlogical-op
+		WARNINGS += -Wjump-misses-init -Wlogical-op
 endif
 
 H_FILES = img.h
@@ -25,45 +41,83 @@ ANALYSIS_DIR = $(BUILD_DIR)/analysis
 
 O_DIR = $(BUILD_DIR)/obj
 O_FILES = $(patsubst %,$(O_DIR)/%,$(_O_FILES))
-LIB_O_FILES = $(patsubst %,$(O_DIR)/%,$(_O_FILES))
+LIB_O_FILES = $(patsubst %,$(O_DIR)/%,$(_LIB_O_FILES))
 
 EXEC = run_tests
 
-LIBRARIES = -lpng
+LIBRARIES = -lpng16 -lz -lm
 
-$(O_DIR)/%.o: %.c $(H_FILES)
+.PHONY: run
+run: $(EXEC)
+	./$(EXEC)
+
+
+$(O_DIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) -fPIC -c -o $@ $< $(CFLAGS)
 
-main: $(O_FILES)
-	$(CC) -o $(EXEC) $(O_FILES) $(CFLAGS) $(LIBRARIES)
+$(EXEC): $(O_FILES)
+	@mkdir -p $(@D)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBRARIES)
 
-run: main
+colors.png read_write.png: $(EXEC)
 	./$(EXEC)
 
-lib: $(LIB_O_FILES)
-	@mkdir -p $(LIB_DIR)
-	ar rcs $(LIB_DIR)/$(LIB_NAME).a $(LIB_O_FILES)
-	gcc -shared -o $(LIB_DIR)/$(LIB_NAME).so $(LIB_O_FILES)
+.PHONY: lib
+lib: $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so
 
-tar:
-	tar -czvf img-$(shell cat VERSION).tar.gz Makefile $(_O_FILES:%.o=%.c) $(H_FILES) LICENSE.txt
-	gpg --output img-$(shell cat VERSION).tar.gz.sig --detach-sig img-$(shell cat VERSION).tar.gz
+$(LIB_DIR)/%.a: $(LIB_O_FILES)
+	@mkdir -p $(@D)
+	ar rcs $@ $^
 
+$(LIB_DIR)/%.so: $(LIB_O_FILES)
+	@mkdir -p $(@D)
+	gcc -shared -o $@ $^
+
+.PHONY: tar
+tar: img-$(shell cat VERSION).tar.gz img-$(shell cat VERSION).tar.gz.sig
+
+img-%.tar.gz: Makefile $(_O_FILES:%.o=%.c) $(H_FILES) LICENSE.txt
+	tar -czvf $@ $^
+
+%.sig: %
+	gpg --output $@ --detach-sig $^
+
+.PHONY: install
 install: lib
 	install $(LIB_DIR)/$(LIB_NAME).a $(LIB_DIR)/$(LIB_NAME).so $(DESTDIR)/usr/lib/
 	install $(H_FILES) $(DESTDIR)/usr/include/
 
-analyze: main
+ANALYSIS_DIR = $(BUILD_DIR)/analysis
+VALGRIND_DEP = $(BUILD_DIR)/.valgrind
+$(VALGRIND_DEP):
 	@command -v valgrind >/dev/null 2>&1 || { echo >&2 "valgrind not found, aborting analyze"; exit 1; }
-	@mkdir -p $(ANALYSIS_DIR)
-	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$(ANALYSIS_DIR)/memcheck.out" ./$(EXEC)
-	@cat $(ANALYSIS_DIR)/memcheck.out
-	valgrind --tool=callgrind --callgrind-out-file="$(ANALYSIS_DIR)/callgrind.out" ./$(EXEC)
-	gprof2dot -f callgrind $(ANALYSIS_DIR)/callgrind.out --root=main | dot -Tpng -o $(ANALYSIS_DIR)/callgrind.png
+	@touch $@
 
+$(ANALYSIS_DIR)/memcheck.out: $(EXEC) $(VALGRIND_DEP)
+	@mkdir -p $(@D)
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$@" ./$<
 
-watch: run
+$(ANALYSIS_DIR)/callgrind.out: $(EXEC) $(VALGRIND_DEP)
+	@mkdir -p $(@D)
+	valgrind --tool=callgrind --callgrind-out-file="$@" ./$<
+
+%callgrind.dot: %callgrind.out
+	gprof2dot -f callgrind --root=main -o $@ $<
+
+%.png: %.dot
+	dot -Tpng -o $@ $<
+
+.PHONY: analyze
+analyze: $(ANALYSIS_DIR)/memcheck.out $(ANALYSIS_DIR)/callgrind.out $(ANALYSIS_DIR)/callgrind.png
+
+INOTIFY_DEP = $(BUILD_DIR)/.inotify
+$(INOTIFY_DEP):
+	@command -v inotifywait >/dev/null 2>&1 || { echo >&2 "inotifywait not found, aborting watch"; exit 1; }
+	@touch $@
+
+.PHONY: watch
+watch: run $(INOTIFY_DEP)
 	@command -v inotifywait >/dev/null 2>&1 || { echo >&2 "inotifywait not found, aborting watch"; exit 1; }
 	feh colors.png &
 	while true; do \
@@ -71,7 +125,6 @@ watch: run
 		make run; \
 		inotifywait -qre modify .; \
 	done
-
 
 .PHONY: clean
 clean:
