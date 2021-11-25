@@ -29,8 +29,8 @@ ifeq ($(CC),gcc)
 endif
 
 H_FILES = img.h
-_O_FILES = img.o test.o
-_LIB_O_FILES = img.o
+_O_FILES = png.o test.o
+_LIB_O_FILES = png.o
 
 BUILD_DIR = target
 

@@ -1,8 +1,6 @@
 #ifndef IMG_H
 #define IMG_H
 
-#include <png.h>
-
 // 8 bits per color, no transparancy
 struct pixel {
     unsigned char red;
@@ -36,4 +34,4 @@ int writepng(const char* file_name, struct img* img_ptr);
 // Returns an integer representing the result status of the read.
 int readpng(const char* file_name, struct img* img_ptr);
 
-#endif
+#endif // IMG_H
