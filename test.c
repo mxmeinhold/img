@@ -13,9 +13,9 @@ void print_colors(void) {
         out_img.rows[row] = calloc(sizeof(struct pixel), out_img.width);
         for (int col = 0; col < out_img.width; col++) {
             struct pixel p;
-            p.red = row;
-            p.blue = col;
-            p.green = 255 - ((row > col)? row:col);
+            p.red = row % 255;
+            p.blue = col % 255;
+            p.green = 255 - ((p.red > p.blue)? p.red:p.blue);
             out_img.rows[row][col] = p;
         }
     }
