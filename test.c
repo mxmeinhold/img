@@ -21,6 +21,9 @@ void print_colors(void) {
     }
 
     writepng("colors.png", &out_img);
+#ifdef INCL_QOI
+    writeqoi("colors.qoi", &out_img);
+#endif
 
     for (int row = 0; row < out_img.height; row++) {
         free(out_img.rows[row]);
@@ -34,6 +37,11 @@ void read_write(void) {
     struct img read_img;
 
     readpng("colors.png", &read_img);
+#ifdef INCL_QOI
+    writeqoi("read_write.qoi", &read_img);
+
+    readqoi("read_write.qoi", &read_img);
+#endif
     writepng("read_write.png", &read_img);
 
     for (int row = 0; row < read_img.height; row++) {

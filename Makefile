@@ -32,6 +32,12 @@ H_FILES = img.h
 _O_FILES = png.o test.o
 _LIB_O_FILES = png.o
 
+ifdef INCL_QOI
+	_O_FILES += qoi.o
+	_LIB_O_FILES += qoi.o
+	CFLAGS += -D INCL_QOI
+endif
+
 BUILD_DIR = target
 
 LIB_NAME = libimg
@@ -77,7 +83,7 @@ $(LIB_DIR)/%.so: $(LIB_O_FILES)
 .PHONY: tar
 tar: img-$(shell cat VERSION).tar.gz img-$(shell cat VERSION).tar.gz.sig
 
-img-%.tar.gz: Makefile $(_O_FILES:%.o=%.c) $(H_FILES) LICENSE.txt
+img-%.tar.gz: VERSION Makefile $(_LIB_O_FILES:%.o=%.c) $(H_FILES) LICENSE.txt
 	tar -czvf $@ $^
 
 %.sig: %

@@ -9,10 +9,8 @@ license=('MIT')
 depends=('glibc')
 makedepends=('git' 'make')
 source=("img-$pkgver.tar.gz" "img-$pkgver.tar.gz.sig")
-sha256sums=(
-    '9f6201c6b27a40778339daa21fad12d37b14562e5921f9d1e735313276a51078'
-    'SKIP'
-)
+sha256sums=('781269f06ac3036ee5f592c3c12c135779114f7173e512296e342c1bee13a7f5'
+            'SKIP')
 validpgpkeys=('B77D730E8D444707FA93320D72E05836F8252405')
 
 build() {
@@ -25,4 +23,3 @@ package() {
     install -Dm644 LICENSE.txt "$pkgdir/usr/share/licenses/$pkgname/MIT-LICENSE"
     make DESTDIR="$pkgdir" install
 }
-

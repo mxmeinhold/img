@@ -4,3 +4,4 @@ target/*
 # Test files
 run_tests
 *.png
+*.qoi

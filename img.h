@@ -34,4 +34,19 @@ int writepng(const char* file_name, struct img* img_ptr);
 // Returns an integer representing the result status of the read.
 int readpng(const char* file_name, struct img* img_ptr);
 
+
+#ifdef INCL_QOI
+
+// Writes the image defined in img_ptr to the file referred to by file_name
+// using the Quite OK Image format (see https://github.com/phoboslab/qoi)
+// Returns an integer representing the result status of the writing.
+int writeqoi(const char* file_name, struct img* img_ptr);
+
+
+// Reads an image from the specified file using the Quite OK Image format
+// (see https://github.com/phoboslab/qoi)
+// Returns an integer representing the result status of the read.
+int readqoi(const char* file_name, struct img* img_ptr);
+
+#endif // INCL_QOI
 #endif // IMG_H
